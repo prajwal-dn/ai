@@ -719,7 +719,19 @@
 
         // Open URL on the user's actual device (client-side)
         if (d.action_url && (d.intent === "open_url" || d.intent === "system_command")) {
-          setTimeout(() => window.open(d.action_url, '_blank'), 800);
+          if (d.deep_link) {
+            // Try deep link first (opens actual app on mobile)
+            const start = Date.now();
+            window.location.href = d.deep_link;
+            // If app not installed, fall back to web URL after 1.5s
+            setTimeout(() => {
+              if (Date.now() - start < 2000) {
+                window.open(d.action_url, '_blank');
+              }
+            }, 1500);
+          } else {
+            setTimeout(() => window.open(d.action_url, '_blank'), 800);
+          }
         }
         pollStatus();
       } catch {

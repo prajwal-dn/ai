@@ -273,16 +273,61 @@ class SystemControl:
         "clock":            "https://www.google.com/search?q=time",
     }
 
+    # Deep links — opens the actual installed app on mobile
+    APP_DEEP_LINKS = {
+        "whatsapp":         "whatsapp://",
+        "instagram":        "instagram://",
+        "insta":            "instagram://",
+        "snapchat":         "snapchat://",
+        "snap":             "snapchat://",
+        "spotify":          "spotify://",
+        "youtube":          "youtube://",
+        "yt":               "youtube://",
+        "youtube music":    "youtubemusic://",
+        "yt music":         "youtubemusic://",
+        "twitter":          "twitter://",
+        "x":                "twitter://",
+        "discord":          "discord://",
+        "telegram":         "tg://",
+        "reddit":           "reddit://",
+        "linkedin":         "linkedin://",
+        "facebook":         "fb://",
+        "fb":               "fb://",
+        "netflix":          "nflx://",
+        "gmail":            "googlegmail://",
+        "google maps":      "comgooglemaps://",
+        "maps":             "comgooglemaps://",
+        "google drive":     "googledrive://",
+        "drive":            "googledrive://",
+        "google photos":    "googlephotos://",
+        "photos":           "googlephotos://",
+        "google pay":       "gpay://",
+        "gpay":             "gpay://",
+        "meet":             "meet://",
+        "tiktok":           "tiktok://",
+        "pinterest":        "pinterest://",
+        "threads":          "barcelona://",
+        "github":           "github://",
+        "notion":           "notion://",
+        "slack":            "slack://",
+        "zoom":             "zoomus://",
+        "claude":           "claude://",
+        "perplexity":       "perplexity://",
+    }
+
     @staticmethod
     def open_app(name):
-        """Always opens something — known URL or silent Google search fallback."""
+        """Always opens something — tries deep link first, falls back to web URL."""
         name_lower = name.lower().strip()
-        url = SystemControl.WEB_APP_URLS.get(name_lower)
-        if url:
-            return {"response": f"Right away, sir. Opening {name.title()} for you.", "intent": "open_url", "action_url": url}
-        # Silent fallback — search Google without showing an error
-        url = f"https://www.google.com/search?q={name_lower.replace(' ', '+')}"
-        return {"response": f"Right away, sir. Searching for {name.title()}.", "intent": "open_url", "action_url": url}
+        deep_link = SystemControl.APP_DEEP_LINKS.get(name_lower)
+        web_url   = SystemControl.WEB_APP_URLS.get(name_lower,
+                    f"https://www.google.com/search?q={name_lower.replace(' ', '+')}")
+        return {
+            "response":  f"Right away, sir. Opening {name.title()} for you.",
+            "intent":    "open_url",
+            "action_url": web_url,
+            "deep_link":  deep_link   # browser tries this first on mobile
+        }
 
     @staticmethod
     def open_url(url):
