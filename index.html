@@ -717,8 +717,9 @@
         appendMsg("jarvis", d.response, d.intent);
         speak(d.response);
 
-        if (d.intent === "system_command" && d.action_url) {
-          setTimeout(() => window.open(d.action_url, '_blank'), 1500);
+        // Open URL on the user's actual device (client-side)
+        if (d.action_url && (d.intent === "open_url" || d.intent === "system_command")) {
+          setTimeout(() => window.open(d.action_url, '_blank'), 800);
         }
         pollStatus();
       } catch {

@@ -167,83 +167,49 @@ ml_model = MLModel()
 class SystemControl:
     OS = platform.system()
 
-    @staticmethod
-    def open_app(name):
-        # Common Windows app aliases
-        WIN_APPS = {
-            "notepad":      "notepad.exe",
-            "calculator":   "calc.exe",
-            "paint":        "mspaint.exe",
-            "chrome":       "chrome.exe",
-            "google chrome":"chrome.exe",
-            "firefox":      "firefox.exe",
-            "edge":         "msedge.exe",
-            "word":         "winword.exe",
-            "excel":        "excel.exe",
-            "powerpoint":   "powerpnt.exe",
-            "vlc":          "vlc.exe",
-            "spotify":      "spotify.exe",
-            "discord":      "discord.exe",
-            "steam":        "steam.exe",
-            "vs code":      "code.exe",
-            "vscode":       "code.exe",
-            "file explorer":"explorer.exe",
-            "explorer":     "explorer.exe",
-            "task manager": "taskmgr.exe",
-            "cmd":          "cmd.exe",
-            "command prompt":"cmd.exe",
-            "powershell":   "powershell.exe",
-            "settings":     "ms-settings:",
-            "camera":       "microsoft.windows.camera:",
-            "maps":         "bingmaps:",
-            "clock":        "ms-clock:",
-            "photos":       "ms-photos:",
-            "snipping tool":"snippingtool.exe",
-        }
-        name_lower = name.lower().strip()
-        exe = WIN_APPS.get(name_lower, name)
-        try:
-            if SystemControl.OS == "Windows":
-                result = subprocess.Popen(exe, shell=True)
-                return f"Opening {name}... Right away, sir!"
-            elif SystemControl.OS == "Darwin":
-                subprocess.Popen(["open", "-a", name])
-                return f"Opening {name}..."
-            else:
-                subprocess.Popen([name_lower])
-                return f"Opening {name}..."
-        except Exception as e:
-            return f"I couldn't find '{name}' on your system. Please check the app name."
+    # Web-safe app aliases — URLs that work from the browser
+    WEB_APP_URLS = {
+        "spotify":      "https://open.spotify.com",
+        "youtube":      "https://youtube.com",
+        "gmail":        "https://mail.google.com",
+        "google maps":  "https://maps.google.com",
+        "maps":         "https://maps.google.com",
+        "twitter":      "https://twitter.com",
+        "instagram":    "https://instagram.com",
+        "whatsapp":     "https://web.whatsapp.com",
+        "github":       "https://github.com",
+        "calculator":   "https://www.google.com/search?q=calculator",
+        "notepad":      "https://shrib.com",
+        "translate":    "https://translate.google.com",
+        "news":         "https://news.google.com",
+    }
 
     @staticmethod
-    def close_app(name):
-        killed = []
-        for p in psutil.process_iter(["pid", "name"]):
-            if name.lower() in p.info["name"].lower():
-                p.kill()
-                killed.append(p.info["name"])
-        return f"Closed: {', '.join(killed)}" if killed else f"'{name}' not running"
+    def open_app(name):
+        """Return a structured action for the browser to execute client-side."""
+        name_lower = name.lower().strip()
+        url = SystemControl.WEB_APP_URLS.get(name_lower)
+        if url:
+            return {"response": f"Right away, sir. Opening {name.title()} for you.", "intent": "open_url", "action_url": url}
+        # Fallback — treat as web search if unknown app
+        url = f"https://www.google.com/search?q={name_lower.replace(' ', '+')}"
+        return {"response": f"I cannot open local apps from the cloud, sir. Here's a web search for {name}: {url}", "intent": "open_url", "action_url": url}
 
     @staticmethod
     def open_url(url):
         if not url.startswith("http"):
             url = "https://" + url
-        webbrowser.open(url)
-        return f"Opened {url}"
+        return {"response": f"Right away, sir. Opening {url}", "intent": "open_url", "action_url": url}
 
     @staticmethod
     def search_web(query):
         url = f"https://www.google.com/search?q={query.replace(' ', '+')}"
-        if platform.system() == "Windows":
-            webbrowser.open(url)
-        return f"Right away, sir. Searching Google for your query: {url}"
+        return {"response": f"Right away, sir. Searching Google for: {query}", "intent": "open_url", "action_url": url}
 
     @staticmethod
     def youtube(query=""):
         url = f"https://www.youtube.com/results?search_query={query.replace(' ', '+')}" if query else "https://youtube.com"
-        if platform.system() == "Windows":
-            webbrowser.open(url)
-        return f"Right away, sir. Opening YouTube for you: {url}"
+        return {"response": f"Right away, sir. Opening YouTube for you.", "intent": "open_url", "action_url": url}
 
     @staticmethod
     def create_file(path, content=""):
@@ -717,12 +683,16 @@ def ask():
     # Command detection
     cmd_res = cmd.detect_and_run(query)
     if cmd_res:
-        # Log command to memory
-        memory.add_command(query, cmd_res)
+        # If command returns a dict (new client-side architecture), use it directly
+        if isinstance(cmd_res, dict):
+            memory.add_command(query, cmd_res.get("response", ""))
+            return jsonify(cmd_res)
+        # Plain string response (time, date, system info etc.)
+        memory.add_command(query, str(cmd_res))
         return jsonify({
             "response": cmd_res,
             "intent": "system_command",
-            "action_url": cmd_res.split(": ")[-1] if "http" in cmd_res else None
+            "action_url": None
         })
     else:
         # fix spelling mistakes
