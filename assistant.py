@@ -245,6 +245,8 @@ class SystemControl:
         "figma":            "https://figma.com",
         "stackoverflow":    "https://stackoverflow.com",
         "stack overflow":   "https://stackoverflow.com",
+        "leetcode":         "https://leetcode.com",
+        "leet code":        "https://leetcode.com",
         "trello":           "https://trello.com",
         "slack":            "https://slack.com",
         "readwise":         "https://readwise.io",
@@ -253,8 +255,14 @@ class SystemControl:
         "onedrive":         "https://onedrive.live.com",
         "one drive":        "https://onedrive.live.com",
         "dropbox":          "https://dropbox.com",
-        "terminal":         "https://termius.com",
+        "termux":           "https://termux.dev",
+        "terminal":         "https://termux.dev",
         "chartbrew":        "https://chartbrew.com",
+        "aria":             "https://aria.opera.com",
+        "cricfy":           "https://cricfy.tv",
+        "cricfy tv":        "https://cricfy.tv",
+        "indus":            "https://indusappstore.com",
+        "indus appstore":   "https://indusappstore.com",
         # ── Shopping ──────────────────────────────────────────────────
         "amazon":           "https://amazon.in",
         "flipkart":         "https://flipkart.com",
@@ -313,6 +321,11 @@ class SystemControl:
         "zoom":             "zoomus://",
         "claude":           "claude://",
         "perplexity":       "perplexity://",
+        "vlc":              "vlc://",
+        "leetcode":         "com.leetcode.android://",
+        "leet code":        "com.leetcode.android://",
+        "onedrive":         "ms-onedrive://",
+        "one drive":        "ms-onedrive://",
     }
 
     @staticmethod
