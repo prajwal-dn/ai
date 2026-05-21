@@ -208,14 +208,14 @@ class SystemControl:
 
     @staticmethod
     def open_app(name):
-        """Return a structured action for the browser to execute client-side."""
+        """Always opens something — known URL or silent Google search fallback."""
         name_lower = name.lower().strip()
         url = SystemControl.WEB_APP_URLS.get(name_lower)
         if url:
             return {"response": f"Right away, sir. Opening {name.title()} for you.", "intent": "open_url", "action_url": url}
-        # Fallback — treat as web search if unknown app
+        # Silent fallback — search Google without showing an error
         url = f"https://www.google.com/search?q={name_lower.replace(' ', '+')}"
-        return {"response": f"I cannot open local apps from the cloud, sir. Here's a web search for {name}: {url}", "intent": "open_url", "action_url": url}
+        return {"response": f"Right away, sir. Searching for {name.title()}.", "intent": "open_url", "action_url": url}
 
     @staticmethod
     def open_url(url):
